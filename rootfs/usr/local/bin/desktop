@@ -3,16 +3,35 @@
 # desktop user, `desktop healthcheck` is the liveness/startup probe.
 set -Eeuo pipefail
 source /usr/local/lib/desktop/common.sh
+source /usr/local/lib/desktop/tls.sh
+source /usr/local/lib/desktop/session.sh
 trap 'die "command failed (${BASH_SOURCE[0]}:${LINENO}): ${BASH_COMMAND}"' ERR
 
 main() {
+    if [ "${1:-}" = healthcheck ]; then
+        if healthcheck; then exit 0; else exit 1; fi
+    fi
+
     setup_runtime_dirs
     setup_identity
     if [ $# -gt 0 ]; then
         run_init_hooks
         exec "$@"
     fi
-    die "desktop mode is not implemented yet"
+
+    validate_config
+    clean_stale_state
+    setup_tls
+    setup_xrdp_config
+    run_init_hooks
+    start_xorg
+    start_chansrv
+    start_pulseaudio
+    start_xfce
+    start_xrdp
+    log "desktop ready: RDP listening on $RDP_LISTEN_ADDRESS:3389"
+    : > "$DESKTOP_RUNTIME_DIR/ready" # healthcheck reports healthy only from here on
+    supervise
 }
 
 main "$@"
