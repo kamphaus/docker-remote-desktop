@@ -1,0 +1,53 @@
+name: snapshot-bump
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Update UBUNTU_SNAPSHOT
+        id: bump
+        run: |
+          snapshot="$(date -u +%Y%m%d)T000000Z"
+          grep -rl --include=Dockerfile '^ARG UBUNTU_SNAPSHOT=' . \
+            | xargs -r sed -i -E "s/^ARG UBUNTU_SNAPSHOT=.*/ARG UBUNTU_SNAPSHOT=${snapshot}/"
+          echo "snapshot=$snapshot" >> "$GITHUB_OUTPUT"
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOT: ${{ steps.bump.outputs.snapshot }}
+        run: |
+          if git diff --quiet; then
+            echo "snapshot already at $SNAPSHOT"
+            exit 0
+          fi
+          branch="snapshot-bump"
+          title="build(deps): bump Ubuntu snapshot to $SNAPSHOT"
+          body="Weekly Ubuntu archive snapshot bump. Merging this PR is how Ubuntu security fixes reach the image."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "$title"
+          git push --force origin "$branch"
+          gh label create dependencies --force --color 0366d6
+          existing="$(gh pr list --head "$branch" --state open --json number -q '.[0].number')"
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "$title" --body "$body"
+          else
+            gh pr create --base master --head "$branch" --label dependencies \
+              --title "$title" --body "$body"
+          fi
+          # PRs created with GITHUB_TOKEN do not trigger pull_request workflows: dispatch CI explicitly.
+          gh workflow run ci.yml --ref "$branch"

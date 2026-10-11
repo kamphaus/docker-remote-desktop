@@ -1,0 +1,7 @@
+# PulseAudio configuration for the desktop session: audio goes to the RDP client via xrdp-chansrv.
+.fail
+load-module module-native-protocol-unix
+load-module module-xrdp-sink
+load-module module-xrdp-source
+set-default-sink xrdp-sink
+set-default-source xrdp-source

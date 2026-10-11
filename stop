@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-
-docker kill remote-desktop
+set -euo pipefail
+docker stop remote-desktop
