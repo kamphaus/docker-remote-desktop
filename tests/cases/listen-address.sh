@@ -13,5 +13,5 @@ listening_on "$w" 00000000:0D3D || fail "RDP_LISTEN_ADDRESS=0.0.0.0 not honoured
 i=$(start_desktop listen-bad -e RDP_LISTEN_ADDRESS=localhost)
 code=$(wait_exit "$i" 30)
 [ "$code" != 0 ] || fail "accepted RDP_LISTEN_ADDRESS=localhost"
-"$RUNTIME" logs "$i" 2>&1 | grep -q "RDP_LISTEN_ADDRESS must be an IPv4 address" || fail "unclear error for bad address"
+logs_contain "$i" "RDP_LISTEN_ADDRESS must be an IPv4 address" || fail "unclear error for bad address"
 pass

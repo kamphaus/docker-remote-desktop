@@ -31,22 +31,11 @@ setup_xrdp_config() {
     xrdp-keygen xrdp "$dir/rsakeys.ini" >/dev/null 2>&1 || die "failed to generate $dir/rsakeys.ini"
 }
 
-# Components are chatty (GTK/dbus warnings), so their output goes to $DESKTOP_RUNTIME_DIR/log/NAME.out and only
-# the tail is replayed to the container log when something goes wrong.
-dump_logs() {
-    local f
-    for f in "$DESKTOP_RUNTIME_DIR"/log/*.out; do
-        [ -s "$f" ] || continue
-        log "last output of $(basename "$f" .out):"
-        tail -n 15 "$f" >&2 || true
-    done
-}
-
 start_component() {
     local name=$1
     shift
     log "starting $name"
-    "$@" >"$DESKTOP_RUNTIME_DIR/log/$name.out" 2>&1 &
+    "$@" &
     COMPONENT_PIDS+=("$!")
 }
 
@@ -57,7 +46,6 @@ wait_for() {
         "$@" 2>/dev/null && return 0
         sleep 0.1
     done
-    dump_logs
     die "timed out after ${timeout}s waiting for $what"
 }
 
@@ -114,7 +102,6 @@ supervise() {
     local rc=0
     wait -n "${COMPONENT_PIDS[@]}" || rc=$?
     log "a desktop component exited (status $rc); stopping the others"
-    dump_logs
     stop_components
     exit 1
 }

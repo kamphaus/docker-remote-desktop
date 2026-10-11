@@ -62,6 +62,13 @@ wait_healthy() {
     done
 }
 
+# logs_contain NAME PATTERN: capture first, then grep (grep -q on a pipe makes `docker logs` die of SIGPIPE under pipefail)
+logs_contain() {
+    local out
+    out=$("$RUNTIME" logs "$1" 2>&1)
+    grep -q -- "$2" <<<"$out"
+}
+
 wait_exit() {
     local name=$1 timeout=$2
     timeout "$timeout" "$RUNTIME" wait "$name" || fail "$name still running after ${timeout}s"

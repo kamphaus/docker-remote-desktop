@@ -18,10 +18,10 @@ chmod -R a+rX "$dir"
 
 m=$(start_desktop tls-mounted -v "$dir/full:/etc/desktop/tls:ro")
 wait_healthy "$m"
-"$RUNTIME" logs "$m" 2>&1 | grep -q "using mounted TLS certificate /etc/desktop/tls/tls.crt" || fail "mounted cert not used"
+logs_contain "$m" "using mounted TLS certificate /etc/desktop/tls/tls.crt" || fail "mounted cert not used"
 
 p=$(start_desktop tls-partial -v "$dir/partial:/etc/desktop/tls:ro")
 code=$(wait_exit "$p" 60)
 [ "$code" != 0 ] || fail "started with only tls.crt mounted"
-"$RUNTIME" logs "$p" 2>&1 | grep -q "both tls.crt and tls.key" || fail "unclear error for partial TLS mount"
+logs_contain "$p" "both tls.crt and tls.key" || fail "unclear error for partial TLS mount"
 pass
