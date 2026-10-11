@@ -55,9 +55,18 @@ rdp_port_open() {
     (exec 3<>"/dev/tcp/$addr/3389") 2>/dev/null
 }
 
+# True if a TCP socket is in LISTEN state on $RDP_LISTEN_ADDRESS:3389. Reads /proc instead of connecting, because
+# every connection that sends no X.224 request makes xrdp log a burst of errors (probes run every few seconds).
+rdp_port_listening() {
+    local o1 o2 o3 o4 want
+    IFS=. read -r o1 o2 o3 o4 <<<"$RDP_LISTEN_ADDRESS"
+    printf -v want '%02X%02X%02X%02X:0D3D' $((10#$o4)) $((10#$o3)) $((10#$o2)) $((10#$o1))
+    awk -v want="$want" '$4 == "0A" && toupper($2) == want {found = 1} END {exit !found}' /proc/net/tcp
+}
+
 start_xorg() {
     start_component Xorg env XRDP_SOCKET_PATH="$XRDP_SOCKET_DIR" /usr/lib/xorg/Xorg ":$DESKTOP_DISPLAY" \
-        -config xrdp/xorg.conf -noreset -nolisten tcp -logfile "$DESKTOP_RUNTIME_DIR/log/Xorg.log"
+        -config xrdp/xorg.conf -noreset -nolisten tcp -nolisten local -logfile "$DESKTOP_RUNTIME_DIR/log/Xorg.log"
     wait_for "the Xorg socket" 30 test -S "$XRDP_SOCKET_DIR/xrdp_display_$DESKTOP_DISPLAY"
     export DISPLAY=":$DESKTOP_DISPLAY"
 }
@@ -116,7 +125,7 @@ healthcheck() {
         echo "unhealthy: Xorg socket missing" >&2
         return 1
     fi
-    if ! rdp_port_open; then
+    if ! rdp_port_listening; then
         echo "unhealthy: xrdp not accepting connections on port 3389" >&2
         return 1
     fi

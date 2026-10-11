@@ -54,6 +54,8 @@ RUN chmod 0755 /usr/local/bin/desktop \
  && chmod -R g=u /home/wineuser /run/desktop \
  && find / -xdev -perm /6000 -type f -exec chmod a-s {} +
 ENV LANG=en_US.UTF-8 HOME=/home/wineuser
+LABEL org.opencontainers.image.source="https://github.com/kamphaus/docker-remote-desktop"
+
 USER 1001
 WORKDIR /home/wineuser
 EXPOSE 3389/tcp

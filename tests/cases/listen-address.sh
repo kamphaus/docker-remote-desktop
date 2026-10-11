@@ -6,6 +6,9 @@ wait_healthy "$d"
 listening_on "$d" 0100007F:0D3D || fail "not listening on 127.0.0.1:3389"
 ! listening_on "$d" 00000000:0D3D || fail "listening on 0.0.0.0:3389 by default"
 
+n=$(exec_in "$d" sh -c 'cat /proc/net/tcp /proc/net/tcp6' | awk '$4 == "0A"' | wc -l)
+[ "$n" = 1 ] || fail "expected exactly 1 LISTEN socket by default, found $n"
+
 w=$(start_desktop listen-any -e RDP_LISTEN_ADDRESS=0.0.0.0)
 wait_healthy "$w"
 listening_on "$w" 00000000:0D3D || fail "RDP_LISTEN_ADDRESS=0.0.0.0 not honoured"

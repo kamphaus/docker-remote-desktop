@@ -72,7 +72,14 @@ log "example hook done"
 tests/run IMAGE [tests/cases/NAME.sh ...]
 ```
 
-Runs the cases in `tests/cases/*.sh` against `IMAGE` (all 11 cases if none are named, for example `tests/run docker-remote-desktop:local tests/cases/lifecycle.sh tests/cases/tls.sh`). The `rdp-e2e` case builds an RDP client image from `tests/rdp-client` and therefore needs network access.
+Runs the cases in `tests/cases/*.sh` against `IMAGE` (all 13 cases if none are named, for example `tests/run docker-remote-desktop:local tests/cases/lifecycle.sh tests/cases/tls.sh`). The `rdp-e2e` case builds an RDP client image from `tests/rdp-client` and therefore needs network access.
+
+## Accepted risks
+
+- There is no RDP password: anyone who can reach port 3389 gets the desktop. Keep the default `127.0.0.1` or restrict access with network policy.
+- Local mode on shared hosts exposes the desktop to every local user who can reach the loopback port.
+- The clipboard is a data channel between client and desktop, in both directions.
+- Ubuntu security fixes arrive with the weekly snapshot bump pull request, not immediately.
 
 ## Dependency updates
 

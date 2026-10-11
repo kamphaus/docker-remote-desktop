@@ -15,6 +15,7 @@ concurrency:
 
 env:
   IMAGE_NAME: ghcr.io/kamphaus/docker-remote-desktop
+  # renovate: datasource=docker depName=aquasec/trivy
   TRIVY_IMAGE: aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa
 
 jobs:
@@ -64,7 +65,6 @@ jobs:
           gunzip -c image.tar.gz | docker load
           version="noble-$(date -u +%Y%m%d)-${GITHUB_SHA::7}"
           docker tag desktop:ci "$IMAGE_NAME:$version"
-          docker tag desktop:ci "$IMAGE_NAME:noble"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -77,7 +77,6 @@ jobs:
           VERSION: ${{ steps.tag.outputs.version }}
         run: |
           docker push "$IMAGE_NAME:$VERSION"
-          docker push "$IMAGE_NAME:noble"
           digest=$(docker buildx imagetools inspect "$IMAGE_NAME:$VERSION" --format '{{json .Manifest.Digest}}' | tr -d '"')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
           echo "Published \`$IMAGE_NAME:$VERSION@$digest\`" >> "$GITHUB_STEP_SUMMARY"
@@ -107,3 +106,9 @@ jobs:
           cosign verify "$IMAGE_NAME@$DIGEST" \
             --certificate-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/ci.yml@refs/heads/master" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com >/dev/null
+      - name: Publish moving tag
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          docker tag "$IMAGE_NAME:$VERSION" "$IMAGE_NAME:noble"
+          docker push "$IMAGE_NAME:noble"

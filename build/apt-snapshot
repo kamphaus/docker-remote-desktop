@@ -16,5 +16,17 @@ apt-get install -y -qq --no-install-recommends ca-certificates >/dev/null
 
 sed -i -e '/^Snapshot:/d' -e "/^Components:/a Snapshot: ${snapshot}" /etc/apt/sources.list.d/ubuntu.sources
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends --allow-downgrades ca-certificates >/dev/null
+# The snapshot's priority (500) does not beat an installed newer version, so move everything the bootstrap
+# installed to the snapshot's exact versions (a no-op when they already match).
+pins=()
+for pkg in $(dpkg-query -W -f='${Package}\n' ca-certificates openssl 'libssl3*' 2>/dev/null); do
+    version=$(apt-cache madison "$pkg" | awk -F'|' 'NR==1 {gsub(/ /, "", $2); print $2}')
+    [ -z "$version" ] || pins+=("$pkg=$version")
+done
+apt-get install -y -qq --no-install-recommends --allow-downgrades "${pins[@]}" >/dev/null
+for pkg in "${pins[@]%%=*}"; do
+    installed=$(dpkg-query -W -f='${Version}' "$pkg")
+    candidate=$(apt-cache policy "$pkg" | awk '/Candidate:/ {print $2}')
+    [ "$installed" = "$candidate" ] || { echo "apt-snapshot: $pkg is $installed, snapshot has $candidate" >&2; exit 1; }
+done
 rm -rf /var/lib/apt/lists/*

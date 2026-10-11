@@ -19,11 +19,11 @@ main() {
         exec "$@"
     fi
 
-    validate_config
     clean_stale_state
     setup_tls
     setup_xrdp_config
     run_init_hooks
+    validate_config # after the hooks, which may export RDP_LISTEN_ADDRESS
     start_xorg
     start_chansrv
     start_pulseaudio

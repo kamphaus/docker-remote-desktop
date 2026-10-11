@@ -12,6 +12,14 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Docker image pins in workflow env blocks annotated with '# renovate:'",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: [^:\\s]+:(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[0-9a-f]{64}))?"
+      ]
+    },
+    {
+      "customType": "regex",
       "description": "ARG pins annotated with '# renovate:' (optionally followed by a matching _COMMIT pin)",
       "managerFilePatterns": ["/(^|/)Dockerfile$/"],
       "matchStrings": [
@@ -26,6 +34,7 @@
       "groupName": "GitHub Actions"
     },
     {
+      "matchManagers": ["dockerfile", "github-actions"],
       "matchUpdateTypes": ["digest", "pinDigest"],
       "automerge": true
     },
