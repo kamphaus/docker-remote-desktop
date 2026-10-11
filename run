@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-
-docker run -it \
-    --rm \
-    --hostname="$(hostname)" \
-    --publish="3389:3389/tcp" \
-    --name="remote-desktop" \
-    --shm-size="1g" \
-    docker-remote-desktop:latest /bin/bash
+# Run an interactive shell in the image as the desktop user (command mode)
+set -euo pipefail
+docker run -it --rm \
+    --user 1001:0 --cap-drop ALL --security-opt no-new-privileges --read-only \
+    --tmpfs /tmp:mode=1777 --tmpfs /run/desktop:mode=0770 --shm-size 1g \
+    -v remote-desktop-home:/home/wineuser "${IMAGE:-docker-remote-desktop:local}" /bin/bash

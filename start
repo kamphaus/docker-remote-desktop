@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-
-docker run --detach \
-    --rm \
-    --hostname="$(hostname)" \
-    --publish="3389:3389/tcp" \
-    --name="remote-desktop" \
-    docker-remote-desktop:latest
+# Start the desktop in the background, reachable only from this machine on 127.0.0.1:3389
+set -euo pipefail
+docker run -d --rm --name remote-desktop \
+    --user 1001:0 --cap-drop ALL --security-opt no-new-privileges --read-only \
+    --tmpfs /tmp:mode=1777 --tmpfs /run/desktop:mode=0770 --shm-size 1g \
+    -v remote-desktop-home:/home/wineuser -e RDP_LISTEN_ADDRESS=0.0.0.0 \
+    -p 127.0.0.1:3389:3389 "${IMAGE:-docker-remote-desktop:local}"
+echo "Connect an RDP client to 127.0.0.1:3389"
