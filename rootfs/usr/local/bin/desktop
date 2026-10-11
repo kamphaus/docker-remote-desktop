@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Container entrypoint: `desktop` starts the RDP desktop, `desktop CMD...` runs CMD as the
+# desktop user, `desktop healthcheck` is the liveness/startup probe.
+set -Eeuo pipefail
+source /usr/local/lib/desktop/common.sh
+trap 'die "command failed (${BASH_SOURCE[0]}:${LINENO}): ${BASH_COMMAND}"' ERR
+
+main() {
+    setup_runtime_dirs
+    setup_identity
+    if [ $# -gt 0 ]; then
+        run_init_hooks
+        exec "$@"
+    fi
+    die "desktop mode is not implemented yet"
+}
+
+main "$@"
