@@ -69,10 +69,10 @@ log "example hook done"
 ## Testing
 
 ```bash
-tests/run IMAGE [CASE...]
+tests/run IMAGE [tests/cases/NAME.sh ...]
 ```
 
-Runs the cases in `tests/cases/*.sh` against `IMAGE` (all 11 cases if none are named, for example `tests/run docker-remote-desktop:local lifecycle tls`). The `rdp-e2e` case builds an RDP client image from `tests/rdp-client` and therefore needs network access.
+Runs the cases in `tests/cases/*.sh` against `IMAGE` (all 11 cases if none are named, for example `tests/run docker-remote-desktop:local tests/cases/lifecycle.sh tests/cases/tls.sh`). The `rdp-e2e` case builds an RDP client image from `tests/rdp-client` and therefore needs network access.
 
 ## Dependency updates
 
