@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Pin every Ubuntu apt source of this image to a snapshot.ubuntu.com timestamp.
+# Usage: apt-snapshot YYYYMMDDTHHMMSSZ
+set -euo pipefail
+
+snapshot=${1:-}
+if ! [[ "$snapshot" =~ ^[0-9]{8}T[0-9]{6}Z$ ]]; then
+    echo "apt-snapshot: invalid snapshot id '$snapshot' (expected YYYYMMDDTHHMMSSZ)" >&2
+    exit 1
+fi
+export DEBIAN_FRONTEND=noninteractive
+
+# snapshot.ubuntu.com is HTTPS-only and the base image has no CA bundle: bootstrap it first.
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends ca-certificates >/dev/null
+
+sed -i -e '/^Snapshot:/d' -e "/^Components:/a Snapshot: ${snapshot}" /etc/apt/sources.list.d/ubuntu.sources
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends --allow-downgrades ca-certificates >/dev/null
+rm -rf /var/lib/apt/lists/*
