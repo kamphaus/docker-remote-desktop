@@ -46,7 +46,7 @@ jobs:
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --title "$title" --body "$body"
           else
-            gh pr create --base master --head "$branch" --label dependencies \
+            gh pr create --base main --head "$branch" --label dependencies \
               --title "$title" --body "$body"
           fi
           # PRs created with GITHUB_TOKEN do not trigger pull_request workflows: dispatch CI explicitly.
