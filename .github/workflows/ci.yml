@@ -63,7 +63,7 @@ jobs:
         id: tag
         run: |
           gunzip -c image.tar.gz | docker load
-          version="noble-$(date -u +%Y%m%d)-${GITHUB_SHA::7}"
+          version="resolute-$(date -u +%Y%m%d)-${GITHUB_SHA::7}"
           docker tag desktop:ci "$IMAGE_NAME:$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -110,5 +110,5 @@ jobs:
         env:
           VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          docker tag "$IMAGE_NAME:$VERSION" "$IMAGE_NAME:noble"
-          docker push "$IMAGE_NAME:noble"
+          docker tag "$IMAGE_NAME:$VERSION" "$IMAGE_NAME:resolute"
+          docker push "$IMAGE_NAME:resolute"
