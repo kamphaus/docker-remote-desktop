@@ -1,6 +1,6 @@
 # docker-remote-desktop
 
-A rootless XFCE desktop served over RDP ([xrdp](https://www.xrdp.org) on Ubuntu 24.04). Audio and clipboard are redirected; drive redirection is disabled. There is no login password: the RDP connection opens the desktop session directly.
+A rootless XFCE desktop served over RDP ([xrdp](https://www.xrdp.org) on Ubuntu 26.04). Audio and clipboard are redirected; drive redirection is disabled. There is no login password: the RDP connection opens the desktop session directly.
 
 ![Screenshot of XFCE desktop](screenshot_2.png)
 

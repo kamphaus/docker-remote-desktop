@@ -12,7 +12,8 @@ start=$SECONDS
 # A crashed component stops the container with a non-zero status
 c=$(start_desktop crash)
 wait_healthy "$c"
-exec_in "$c" sh -c 'for p in /proc/[0-9]*; do [ "$(cat "$p/comm" 2>/dev/null)" = Xorg ] && kill "${p#/proc/}"; done; true'
+# The exec can die with the container it just brought down (exit 137): wait_exit below is the check
+exec_in "$c" sh -c 'for p in /proc/[0-9]*; do [ "$(cat "$p/comm" 2>/dev/null)" = Xorg ] && kill "${p#/proc/}"; done; true' || true
 code=$(wait_exit "$c" 30)
 [ "$code" != 0 ] || fail "container exited 0 after Xorg crashed"
 

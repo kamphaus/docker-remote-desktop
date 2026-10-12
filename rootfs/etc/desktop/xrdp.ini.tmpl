@@ -44,6 +44,7 @@ lib=libxup.so
 username=na
 password=na
 ip=127.0.0.1
-port=/run/xrdp/sockdir/xrdp_display_10
-chansrvport=DISPLAY(10)
+port=${XRDP_SOCKET_DIR}/xrdp_display_10
+; Explicit path: without sesman, xrdp 0.10 would resolve DISPLAY(10) with uid -1
+chansrvport=${XRDP_SOCKET_DIR}/xrdp_chansrv_socket_10
 code=20
