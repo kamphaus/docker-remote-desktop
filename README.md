@@ -92,3 +92,4 @@ Dependencies are kept current by Renovate, plus a weekly pull request that moves
 - The image runs as UID 1001 instead of root, with a read-only root filesystem supported.
 - xrdp listens on `127.0.0.1` by default instead of all interfaces.
 - The image is published on GHCR (`ghcr.io/kamphaus/docker-remote-desktop`) instead of Docker Hub.
+- Only `linux/amd64` images are built and published; the `linux/arm64` and `linux/arm/v7` images are gone.
