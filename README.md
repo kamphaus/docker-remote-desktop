@@ -48,6 +48,7 @@ USER 1001
 ```
 
 - Do not override `ENTRYPOINT`. The entrypoint is `desktop`: without arguments it starts the desktop; with arguments it runs them as the desktop user (command mode); `desktop healthcheck` is the liveness/startup probe.
+- Run `desktop healthcheck` as the container's own UID. xrdp keeps its sockets in a per-UID directory (`/run/xrdp/sockdir/<uid>`), so a check run as another user, for example `docker exec -u 0 CONTAINER desktop healthcheck`, looks in the wrong directory and reports `unhealthy: Xorg socket missing`. Kubernetes/OpenShift exec probes and plain `docker exec` use the container's UID and are unaffected.
 - Keep `USER 1001` (primary group 0). The image also works under an arbitrary UID in group 0, as OpenShift assigns.
 - Write only to `/home/wineuser`, `/run/desktop` and `/tmp`; everything else is read-only at runtime. Make files you add to the image group-0 readable (and group-writable if they must be written).
 - `/etc/xrdp` is a symlink to a per-start runtime directory built from `/usr/share/desktop/xrdp-etc`. Customise xrdp configuration (keymaps and so on) under `/usr/share/desktop/xrdp-etc`, not `/etc/xrdp`.
@@ -84,6 +85,8 @@ Runs the cases in `tests/cases/*.sh` against `IMAGE` (all 13 cases if none are n
 ## Dependency updates
 
 Dependencies are kept current by Renovate, plus a weekly pull request that moves the pinned Ubuntu apt snapshot forward.
+
+Updated images are published under the moving tag `resolute` (Ubuntu 26.04) and immutable `resolute-YYYYMMDD-<sha>` tags. The earlier `noble` (Ubuntu 24.04) tag is frozen at its last digest and no longer receives Ubuntu security fixes: switch images built on `:noble` to `:resolute`.
 
 ## Breaking changes from upstream
 
