@@ -2,7 +2,8 @@
 # Starts and supervises the desktop session components as the current (unprivileged) user.
 
 DESKTOP_DISPLAY=10
-XRDP_SOCKET_DIR=/run/xrdp/sockdir
+# Must match xrdp-chansrv's hard-wired <socket root>/<uid> (Ubuntu's socket root is /run/xrdp/sockdir)
+XRDP_SOCKET_DIR="/run/xrdp/sockdir/$(id -u)"
 COMPONENT_PIDS=()
 
 validate_config() {
@@ -87,8 +88,8 @@ start_xfce() {
 }
 
 start_xrdp() {
-    export DESKTOP_RUNTIME_DIR # envsubst only sees exported variables
-    envsubst '${RDP_LISTEN_ADDRESS} ${TLS_CERT} ${TLS_KEY} ${DESKTOP_RUNTIME_DIR}' \
+    export DESKTOP_RUNTIME_DIR XRDP_SOCKET_DIR # envsubst only sees exported variables
+    envsubst '${RDP_LISTEN_ADDRESS} ${TLS_CERT} ${TLS_KEY} ${DESKTOP_RUNTIME_DIR} ${XRDP_SOCKET_DIR}' \
         < /etc/desktop/xrdp.ini.tmpl > "$DESKTOP_RUNTIME_DIR/xrdp.ini"
     start_component xrdp /usr/sbin/xrdp --nodaemon --config "$DESKTOP_RUNTIME_DIR/xrdp.ini"
     wait_for "xrdp on $RDP_LISTEN_ADDRESS:3389" 30 rdp_port_open

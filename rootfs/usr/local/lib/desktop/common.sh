@@ -20,7 +20,8 @@ require_writable() {
 
 setup_runtime_dirs() {
     require_writable "$DESKTOP_RUNTIME_DIR" "$HOME" /tmp
-    mkdir -p "$DESKTOP_RUNTIME_DIR"/{log,tls,nss,xrdp/sockdir,xdg}
+    # xrdp 0.10 puts its sockets in a per-uid directory below the compiled-in root /run/xrdp/sockdir
+    mkdir -p "$DESKTOP_RUNTIME_DIR"/{log,tls,nss,xdg} "$DESKTOP_RUNTIME_DIR/xrdp/sockdir/$(id -u)"
     chmod 0700 "$DESKTOP_RUNTIME_DIR/xdg"
     export XDG_RUNTIME_DIR="$DESKTOP_RUNTIME_DIR/xdg"
 }
