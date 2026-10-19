@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
 
 # Ubuntu archive snapshot for every apt operation; bumped weekly by .github/workflows/snapshot-bump.yml
-ARG UBUNTU_SNAPSHOT=20261012T000000Z
+ARG UBUNTU_SNAPSHOT=20261019T000000Z
 
 FROM ubuntu:26.04@sha256:c098726dd9b9733f3e885f8de0ef375206a311b0a317eadc40d347b1115fb944 AS base
 ARG UBUNTU_SNAPSHOT
