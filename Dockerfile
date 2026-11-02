@@ -3,7 +3,7 @@
 # Ubuntu archive snapshot for every apt operation; bumped weekly by .github/workflows/snapshot-bump.yml
 ARG UBUNTU_SNAPSHOT=20261026T000000Z
 
-FROM ubuntu:26.04@sha256:c098726dd9b9733f3e885f8de0ef375206a311b0a317eadc40d347b1115fb944 AS base
+FROM ubuntu:26.04@sha256:6a06111c3b0a8600feadb270aec771dc239bf407b25625f93f44ab00e11f4d3c AS base
 ARG UBUNTU_SNAPSHOT
 COPY --chmod=0755 build/apt-snapshot /usr/local/sbin/apt-snapshot
 RUN apt-snapshot "${UBUNTU_SNAPSHOT}"
